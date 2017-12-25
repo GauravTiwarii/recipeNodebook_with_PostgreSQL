@@ -10,7 +10,6 @@ var express = require('express'),
 //DB Connect String
 var connect = "postgres://gaurav:bigtobesmall@localhost/recipebookdb"
 
-
 //Assign Dust Engine To .dust Files
 app.engine('dust', cons.dust);
 
@@ -27,7 +26,21 @@ app.use(bodyParser.urlencoded({ extended : false}));
 
 //routes  ( Not clean code )
 app.get('/', function(req, res){
-	res.render('index');
+	
+	pg.connect(connect, function(err, client, done){
+		if(err){
+			return console.error('error fetching client from pool.', err);	
+		}
+		client.query('SELECT * FROM recipes', function(err, result){
+			if(err){
+				return console.error('error running query', err);
+			}
+			res.render('index', {recipes: result.rows});
+			done();
+		});
+	});
+	
+
 })
 
 //server 
